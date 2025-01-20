@@ -1,0 +1,5 @@
+
+# Database Configuration
+database:
+  type: "sqlite"  # or postgresql
+  path: "data/database/detections.db"

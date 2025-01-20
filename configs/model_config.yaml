@@ -1,0 +1,13 @@
+
+# YOLOv8 Configuration
+model:
+  type: "yolov8n"  # Model size: n, s, m, l, x
+  classes: []      # Brand classes to detect
+  conf_thresh: 0.25
+  iou_thresh: 0.45
+
+# Training configuration
+training:
+  epochs: 100
+  batch_size: 16
+  image_size: 640
