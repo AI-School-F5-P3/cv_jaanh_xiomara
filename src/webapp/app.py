@@ -26,9 +26,15 @@ def capture_video(video="0"):
         try:
             results = model(frame, save=False, verbose=False)[0]
             box = results.boxes
+            cls = int(box[0].cls[0])
+            conf = float(box[0].conf[0])
+            class_name = model.names[cls]
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             cv.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 4)
-            
+            label = f'{class_name} {conf:.2f}'
+            cv.putText(frame, label, (x1, y1 - 10), 
+                        cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
             frame_rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
             stframe.image(frame_rgb, channels="RGB")
 
@@ -38,35 +44,41 @@ def capture_video(video="0"):
 
     cap.release()
 
+def page_video():
+    video_file = st.file_uploader("Choose a video file", type=["mp4", "avi", "mov"])
+    if video_file is not None:
+        st.video(video_file)
+        if st.button("Analyze Video"):
+            st.info("Analysis in progress...")
+            tfile = tempfile.NamedTemporaryFile(delete=False)
+            tfile.write(video_file.read())
+            capture_video(tfile.name)
+
+def page_camera():
+    start = st.button("Iniciar")
+    stop = st.button("Stop")
+    if start:
+        st.warning("Camara encendida.")
+        capture_video()
+    elif stop:
+        st.warning("Camara apagada.")
+
+
 def main():
     st.title("Brand Detection System")
     st.write("Upload a video to detect and track brand logos")
 
     opt = st.sidebar.selectbox(
-        "Que quieres hacer?",
+        "Escoge una opción",
         ("imagen", "video", "camara")
     )
     
     if opt == "imagen":
         pass
     elif opt == "video":
-        # File uploader
-        video_file = st.file_uploader("Choose a video file", type=["mp4", "avi", "mov"])
-        
-        if video_file is not None:
-            st.video(video_file)
-            
-            if st.button("Analyze Video"):
-                st.info("Analysis in progress...")
-                tfile = tempfile.NamedTemporaryFile(delete=False)
-                tfile.write(video_file.read())
-                capture_video(tfile.name)
-                # Add detection logic here
+        page_video()
     elif opt == "camara":
-        start = st.button("Iniciar")
-        if start:
-            capture_video()
-
+        page_camera()
             
 if __name__ == "__main__":
     main()
